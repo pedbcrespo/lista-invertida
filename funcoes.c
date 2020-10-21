@@ -402,6 +402,7 @@ void imprimir_ordenado(tup*vetor, int tam, char*palavra){
             printf("%s : %d\n", vetor[i].arquivo, vetor[i].freq);
     }
 }
+
 //=======================CHAR FUNCOES====================//
 char*converte_minusculo(char*palavra){//SEM PROBLEMAS POR AQUI
     int tam = strlen(palavra);
