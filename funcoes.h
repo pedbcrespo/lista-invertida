@@ -41,14 +41,17 @@ int tamanho_lista_palavras(lst lista);
 int cont_freq_arq(lst lista, char*palavra);
 int cont_repet_lst(lst lista, char*palavra);
 int busca_pos(idc*vetor, int tam, char*palavra);
+int compara (const void * a, const void * b);
 
 void criar_arq_bin(idc*vetor, int tam);
 void criar_arq_bin_tup(tup*vetor, int tam);
 void imprimir_indice(idc*vetor, int tam);
 void imprimir_termo_buscado(idc*vetor, int tam, tup*vetor_tup, char*palavra);
+void imprimir_termo_buscado_alt(idc*vetor, int tam, tup*vetor_tup, int quant_arq, char*palavra);
 void imprimir_tupla(tup*vetor, int tam);
 void busca_eh(idc*vetor, int tam, tup*vetor_tup, int quant_arq, char*palavra1, char*palavra2);
 void busca_ou(idc*vetor, int tam, tup*vetor_tup, int quant_arq, char*palavra1, char*palavra2);
 void imprimir_lista(lst lista);
+void imprimir_ordenado(tup*vetor, int tam, char*palavra);
 
 char*converte_minusculo(char*palavra);

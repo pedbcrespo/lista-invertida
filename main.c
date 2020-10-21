@@ -3,12 +3,10 @@
 #include<string.h>
 #include<ctype.h>
 #include"funcoes.h"
-//para executar: gcc main.c funcoes.c -o main.exe
-/*Por se tratar de um trabalho de faculdade, eu considero que o arquivo chamado "docs" esteja dentro da pasta do projeto
-e que todo novo arquivo texto criado tambem esteja na mesma pasta*/
+//gcc main.c funcoes.c -o main.exe
 
 int menu();
-int sub_menu();
+int sub_menu(char*texto);
 
 int main(){
     int tam, tam_tup, opc = -1, quant_arq = 20;
@@ -42,14 +40,22 @@ int main(){
     system("cls");
         opc = menu();
         if(opc == 1){//Buscar uma palavra;
-            // imprimir_indice(vetor, tam);
-            imprimir_lista(lista);
+            imprimir_indice(vetor, tam);
+            // imprimir_lista(lista);
             printf("\n\ntermo buscado: ");
-            scanf("%s", palavra);        
-            imprimir_termo_buscado(vetor, tam, vetor_tup, palavra);
+            scanf("%s", palavra);
+            opc = sub_menu("\n1)imprimir ordem arquivo\n2)imprimir ordem frequencia\n");
+            if(opc == 1)        
+                imprimir_termo_buscado(vetor, tam, vetor_tup, palavra);
+            else if(opc == 2)
+                imprimir_termo_buscado_alt(vetor, tam, vetor_tup, quant_arq, palavra);
+            else{
+                printf("opcao invalida, padrao impressao por arquivo\n");
+                imprimir_termo_buscado(vetor, tam, vetor_tup, palavra);
+            }
         }
         else if(opc == 2){//Buscar 2 palavras
-            opc = sub_menu();
+            opc = sub_menu("\n1)busca E\n2)busca OU\n");
             char palavra1[20], palavra2[20];
             if(opc == 1){
                 printf("termo 1 e 2: ");
@@ -105,9 +111,9 @@ int menu(){
     return opc;
 }
 
-int sub_menu(){
+int sub_menu(char*texto){
     int opc;
-    printf("\t1)busca tipo 'E'\n\t2)busca tipo 'OU'\n");
+    printf("%s", texto);
     scanf("%d", &opc);
     return opc;
 }

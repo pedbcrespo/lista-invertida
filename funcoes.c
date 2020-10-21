@@ -148,9 +148,11 @@ idc*inserir_idc(idc*vetor, int*tam, char*palavra){
         *tam = 1;
     }
     else{
-        vetor = realloc(vetor, *tam+1);
-        strcpy(vetor[*tam].palavra, palavra);
-        *tam += 1;
+        if(existe_idc(vetor, *tam, palavra) != -1){
+            vetor = realloc(vetor, *tam+1);
+            strcpy(vetor[*tam].palavra, palavra);
+            *tam += 1;
+        }
     }
     return vetor;
 }
@@ -240,7 +242,11 @@ int busca_pos(idc*vetor, int tam, char*palavra){
     
     return -1;
 }
-
+int compara (const void * a, const void * b){
+    tup *info1 = (tup *)a;
+    tup *info2 = (tup *)b;
+    return ( info2->freq - info1->freq );
+}
 
 //=======================VOID FUNCOES====================//
 void criar_arq_bin(idc*vetor, int tam){
@@ -266,7 +272,7 @@ void imprimir_indice(idc*vetor, int tam){
         printf("%s\n", vetor[i].palavra);
     }
 }
-void imprimir_termo_buscado(idc*vetor, int tam, tup*vetor_tup, char*palavra){//FALTA ODERNAR PELA FREQUENCIA
+void imprimir_termo_buscado(idc*vetor, int tam, tup*vetor_tup, char*palavra){
     for(int i=0; i<tam; i++){
         if(strcmp(vetor[i].palavra, palavra)==0){
             int pos = vetor[i].prim_pos_tup;
@@ -279,6 +285,24 @@ void imprimir_termo_buscado(idc*vetor, int tam, tup*vetor_tup, char*palavra){//F
             break;
         }
     }
+
+}
+void imprimir_termo_buscado_alt(idc*vetor, int tam, tup*vetor_tup, int quant_arq, char*palavra){
+    int pos, cont=0;
+    for(int i=0; i<tam; i++){
+        if(strcmp(vetor[i].palavra, palavra)==0){
+            pos = vetor[i].prim_pos_tup;
+            break;
+        }
+    }
+    tup*aux = (tup*)malloc(quant_arq*sizeof(tup));
+    for(int i=0; i<quant_arq; i++){
+        aux[i].freq = vetor_tup[pos+i].freq;
+        strcpy(aux[i].arquivo, vetor_tup[pos+i].arquivo);
+    }
+    
+    imprimir_ordenado(aux, quant_arq, palavra);
+
 }
 void imprimir_tupla(tup*vetor, int tam){
     for(int i=0; i<tam; i++){
@@ -350,7 +374,18 @@ void imprimir_lista(lst lista){
         printf("%s\n", pl->palavra);
     }
 }
+void imprimir_ordenado(tup*vetor, int tam, char*palavra){
+    int cont=0;
+    char arq_maior[20];
+    
+    qsort(vetor, tam, sizeof(tup), compara);
 
+    printf("termo: %s\n", palavra);
+    for(int i=0; i<tam; i++){
+        if(vetor[i].freq>0)
+            printf("%s : %d\n", vetor[i].arquivo, vetor[i].freq);
+    }
+}
 //=======================CHAR FUNCOES====================//
 char*converte_minusculo(char*palavra){//SEM PROBLEMAS POR AQUI
     int tam = strlen(palavra);
