@@ -4,6 +4,13 @@
 #include<ctype.h>
 #include"funcoes.h"
 //gcc main.c funcoes.c -o main.exe
+/*Considero que o arquivo .\\docs estara dentro da pasta do projeto
+
+No trabalho, esta as 3 questoes
+1) busca por um termo, sendo que a resposta é uma lista mostrando a frequencia da palavra em cada arquivo
+2) busca por 2 termos, podendo ser a busca do tipo 'e' ou do tipo 'ou'
+3) permite adicionar mais arquivos
+*/
 
 int menu();
 int sub_menu(char*texto);
