@@ -266,7 +266,7 @@ void imprimir_indice(idc*vetor, int tam){
         printf("%s\n", vetor[i].palavra);
     }
 }
-void imprimir_termo_buscado(idc*vetor, int tam, tup*vetor_tup, char*palavra){
+void imprimir_termo_buscado(idc*vetor, int tam, tup*vetor_tup, char*palavra){//FALTA ODERNAR PELA FREQUENCIA
     for(int i=0; i<tam; i++){
         if(strcmp(vetor[i].palavra, palavra)==0){
             int pos = vetor[i].prim_pos_tup;
