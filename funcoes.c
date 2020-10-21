@@ -26,7 +26,7 @@ tup*gera_tupla(tup*vetor, idc*indice, int tam_idc, char**arquivos, int *tam_tup,
     printf("tupla gerada com sucesso\n");
     return vetor;
 }
-tup*ler_arquivo_bin_tup(char*arquivo, int*tam){
+tup*ler_arquivo_bin_tup(char*arquivo, int*tam, int*quant_arq){
     printf("lendo %s\n", arquivo);
     FILE*arq=fopen(arquivo, "rb");
     if(arq == NULL){
@@ -43,6 +43,12 @@ tup*ler_arquivo_bin_tup(char*arquivo, int*tam){
         pos++;
     }
     fclose(arq);
+    FILE*arq2 = fopen("quant_arq.bin", "rb");
+    if(arq2 == NULL){
+        *quant_arq = 20;
+    }
+    fread(quant_arq, sizeof(int), 1, arq);
+    fclose(arq2);
     printf("arquivo bin lido com sucesso\n");
     return vetor;
 }
@@ -142,6 +148,8 @@ lst mantem_mais_repetidas(lst lista, char**arquivos, int qtd_arq){
 
 //=======================IDC FUNCOES====================//
 idc*inserir_idc(idc*vetor, int*tam, char*palavra){
+    printf("verificando indice\n");
+    idc*novo_vet = (idc*)malloc((*tam+1)*sizeof(idc));
     if(vetor == NULL){
         vetor = (idc*)malloc(sizeof(idc));
         strcpy(vetor[0].palavra, palavra);
@@ -149,10 +157,15 @@ idc*inserir_idc(idc*vetor, int*tam, char*palavra){
     }
     else{
         if(existe_idc(vetor, *tam, palavra) != -1){
-            vetor = realloc(vetor, *tam+1);
-            strcpy(vetor[*tam].palavra, palavra);
+            for(int i=0; i<*tam; i++){
+                strcpy(novo_vet[i].palavra, vetor[i].palavra);
+            }
+            strcpy(novo_vet[*tam].palavra, palavra);
             *tam += 1;
-        }
+            free(vetor);
+            return novo_vet;
+        }else
+            return vetor;
     }
     return vetor;
 }
@@ -258,13 +271,16 @@ void criar_arq_bin(idc*vetor, int tam){
     fclose(arq);
     printf("arquivo criado com sucesso\n");
 }
-void criar_arq_bin_tup(tup*vetor, int tam){
+void criar_arq_bin_tup(tup*vetor, int tam, int quant_arq){
     printf("criando arquivo tupla.bin\n");
     FILE*arq = fopen("registros.bin","ab");
     for(int i=0; i<tam; i++){
         fwrite(&vetor[i], sizeof(tup), 1, arq);
     }
     fclose(arq);
+    FILE*arq2 = fopen("quant_arq.bin", "wb");
+    fwrite(&quant_arq, sizeof(int), 1, arq2);
+    fclose(arq2);
     printf("arquivo criado com sucesso\n");
 }
 void imprimir_indice(idc*vetor, int tam){

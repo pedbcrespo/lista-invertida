@@ -20,7 +20,7 @@ typedef struct indice{
 } idc;
 
 tup*gera_tupla(tup*vetor, idc*indice, int tam_idc, char**arquivos, int *tam_tup, int quant_arq);
-tup*ler_arquivo_bin_tup(char*arquivo, int*tam);
+tup*ler_arquivo_bin_tup(char*arquivo, int*tam, int*quant_arq);
 
 lst inserir_lst(lst no, char*palavra);
 lst conjunto_listas(lst lista1, lst lista2);
@@ -44,7 +44,7 @@ int busca_pos(idc*vetor, int tam, char*palavra);
 int compara (const void * a, const void * b);
 
 void criar_arq_bin(idc*vetor, int tam);
-void criar_arq_bin_tup(tup*vetor, int tam);
+void criar_arq_bin_tup(tup*vetor, int tam, int quant_arq);
 void imprimir_indice(idc*vetor, int tam);
 void imprimir_termo_buscado(idc*vetor, int tam, tup*vetor_tup, char*palavra);
 void imprimir_termo_buscado_alt(idc*vetor, int tam, tup*vetor_tup, int quant_arq, char*palavra);
