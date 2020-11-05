@@ -25,7 +25,7 @@ tup*gera_tupla(idc*indice, char**arquivos, int tam_tup, int quant_arq){
     printf("tupla gerada com sucesso\n");
     return aux;
 }
-tup*ler_arquivo_bin_tup(char*arquivo, int*tam, int*quant_arq){
+tup*ler_arquivo_bin_tup(char*arquivo, int*tam){
     printf("lendo %s\n", arquivo);
     FILE*arq=fopen(arquivo, "rb");
     if(arq == NULL){
@@ -42,12 +42,6 @@ tup*ler_arquivo_bin_tup(char*arquivo, int*tam, int*quant_arq){
         pos++;
     }
     fclose(arq);
-    FILE*arq2 = fopen("quant_arq.bin", "rb");
-    if(arq2 == NULL){
-        *quant_arq = 20;
-    }
-    fread(quant_arq, sizeof(int), 1, arq);
-    fclose(arq2);
     printf("arquivo bin lido com sucesso\n");
     return vetor;
 }
@@ -63,6 +57,16 @@ lst inserir_lst(lst no, char*palavra){
     } 
     return no;
 }
+lst remover(lst no, char*palavra){
+    if(no != NULL){
+        if(strcmp(no->palavra, palavra)){
+            lst aux = no->prox;
+            free(no);
+            return aux;
+        }
+    }
+    return no;
+}
 lst destruir_lst(lst no){
 	if(no != NULL){
 		no->prox = destruir_lst(no->prox);
@@ -70,6 +74,16 @@ lst destruir_lst(lst no){
 		no = NULL;
 	}
 	return no;
+}
+lst tratamento_repeticao(lst lista){
+    lst lista_atualizada = NULL;
+    for(lst aux = lista; aux != NULL; aux = aux->prox){
+        if(!existe(lista_atualizada, converte_minusculo(aux->palavra))){
+            lista_atualizada = inserir_lst(lista_atualizada, converte_minusculo(aux->palavra));
+        }
+    }
+    lista = destruir_lst(lista);
+    return lista_atualizada;
 }
 lst ler_arquivo_texto(char*arquivo){
     // printf("lendo arquivo %s\n", arquivo);
@@ -88,16 +102,31 @@ lst ler_arquivo_texto(char*arquivo){
             texto[i] = c;
         }
         texto[t] = '\0';
-        pch = strtok(texto, " ,.:;!?()[]\n\t");
+        pch = strtok(texto, " ,.;:-!?\n\t[]()/");
         while(pch != NULL){
             lista = inserir_lst(lista, converte_minusculo(pch));
-            pch = strtok(NULL, " ,.:;!?()[]\n\t");
+            pch = strtok(NULL, " ,.;:-!?\n\t[]()/");
         }
 
         fclose(arq);
     }
     // printf("arquivo lido com sucesso\n");
     return lista;
+}
+lst remove_stop_words(lst palavras, lst stop_words){
+    lst lista = NULL;
+    for(lst pl = palavras; pl != NULL; pl=pl->prox){
+        if(!existe(stop_words, pl->palavra))
+            lista = inserir_lst(lista, pl->palavra);
+    }
+    palavras = destruir_lst(palavras);
+    return lista;
+}
+lst conjunto_listas(lst lista1, lst lista2){
+    for(lst pl=lista2; pl!=NULL; pl=pl->prox){
+            lista1 = inserir_lst(lista1, converte_minusculo(pl->palavra));
+    }
+    return lista1;
 }
 
 //=======================IDC FUNCOES====================//
@@ -127,7 +156,8 @@ idc*gera_indice(lst lista){
     int pos=0;
     idc*vetor = (idc*)malloc(tam*sizeof(idc));
     for(lst pl=lista; pl!=NULL; pl=pl->prox){
-        strcpy(vetor[pos].palavra, pl->palavra);
+        strcpy(vetor[pos].palavra, converte_minusculo(pl->palavra));
+        vetor[pos].prim_pos_tup = -1;
         pos++;
     }
     printf("indice gerado com sucesso\n");
@@ -135,6 +165,19 @@ idc*gera_indice(lst lista){
 }
 
 //=======================INT FUNCOES====================//
+int arquivo_bin_existe(char*arquivo){
+    FILE*arq=fopen(arquivo, "rb");
+    if(arq == NULL)
+        return 0;
+    return 1;
+}
+int existe(lst lista, char*palavra){
+    if(lista == NULL)
+        return 0;
+    else{
+        return strcmp(converte_minusculo(lista->palavra),converte_minusculo(palavra)) == 0? 1: existe(lista->prox, palavra);
+    }
+}
 int quant_caracter(char*arquivo){
     FILE*arq = fopen(arquivo,"r");
     int c;
@@ -149,12 +192,20 @@ int tamanho_lista_palavras(lst lista){
     return lista != NULL? 1 + tamanho_lista_palavras(lista->prox) : 0; 
 }
 int cont_freq_arq(lst lista, char*palavra){
-    int cont = 0;
-    for(lst aux = lista; aux != NULL; aux = aux->prox){
-        if(strcmp(aux->palavra, palavra) == 0)
-            cont++;
+    return lista == NULL? 0: strcmp(lista->palavra, converte_minusculo(palavra)) == 0? 1 + cont_freq_arq(lista->prox, converte_minusculo(palavra)): cont_freq_arq(lista->prox, converte_minusculo(palavra));
+}
+int cont_quant_arq(char*arquivo){
+    FILE*arq=fopen(arquivo, "rb");
+    int cont=0, id;
+    tup elem;
+    fread(&elem, sizeof(tup), 1, arq);
+    id = elem.id;
+    while(elem.id == id){
+        cont++;
+        fread(&elem, sizeof(tup), 1, arq);
     }
     return cont;
+
 }
 int compara (const void * a, const void * b){
     tup *info1 = (tup *)a;
@@ -167,11 +218,18 @@ int menu(char*texto){
     scanf("%d", &opc);
     return opc;
 }
+int existe_idc(idc*vetor, int tam, char*palavra){
+    for(int i=0; i<tam; i++){
+        if(strcmp(vetor[i].palavra, palavra) == 0)
+            return 1;
+    }
+    return 0;
+}
 
 //=======================VOID FUNCOES====================//
 void criar_arq_bin(idc*vetor, int tam){
     printf("criando arquivo indice.bin\n");
-    FILE*arq = fopen("indice.bin", "ab");
+    FILE*arq = fopen("indice.bin", "wb");
     for(int i=0; i<tam; i++){
         fwrite(&vetor[i], sizeof(idc), 1, arq);
     }
@@ -185,17 +243,10 @@ void criar_arq_bin_tup(tup*vetor, int tam, int quant_arq){
         fwrite(&vetor[i], sizeof(tup), 1, arq);
     }
     fclose(arq);
-    FILE*arq2 = fopen("quant_arq.bin", "wb");
-    fwrite(&quant_arq, sizeof(int), 1, arq2);
-    fclose(arq2);
+    // FILE*arq2 = fopen("quant_arq.bin", "wb");
+    // fwrite(&quant_arq, sizeof(int), 1, arq2);
+    // fclose(arq2);
     printf("arquivo criado com sucesso\n");
-}
-void criar_arq_stop_words(lst lista){
-    FILE*arq = fopen("stop_words.txt", "w");
-    for(lst pl=lista; pl!=NULL; pl=pl->prox){
-        fprintf(arq, "%s ", pl->palavra);
-    }
-    fclose(arq);
 }
 void imprimir_indice(idc*vetor, int tam){
     for(int i=0; i<tam; i++){
@@ -244,7 +295,7 @@ void busca_eh_arq(char*arquivo_idc, char*arquivo_tup, char*palavra, char*palavra
     
     for(int i=0; i<qtd_arq; i++){
         if(vetor1[i].freq >0 && vetor2[i].freq > 0)
-            printf("%s : p1: %d p2: %d\n", vetor1[i].arquivo, vetor1[i].freq, vetor2[i].freq);
+            printf("%s [p1: %d] [p2: %d]\n", vetor1[i].arquivo, vetor1[i].freq, vetor2[i].freq);
     }
     fclose(arq2);
 
@@ -285,7 +336,7 @@ void busca_ou_arq(char*arquivo_idc, char*arquivo_tup, char*palavra, char*palavra
     
     for(int i=0; i<qtd_arq; i++){
         if(vetor1[i].freq > 0 || vetor2[i].freq > 0)
-            printf("%s : p1: %d p2: %d\n", vetor1[i].arquivo, vetor1[i].freq, vetor2[i].freq);
+            printf("%s [p1: %d] [p2: %d]\n", vetor1[i].arquivo, vetor1[i].freq, vetor2[i].freq);
     }
     fclose(arq2);
 
@@ -297,12 +348,13 @@ void imprimir_lista(lst lista){
 }
 void imprimir_do_arquivo(char*arquivo_idc, char*arquivo_tup, int qtd_arq, char*palavra){
     FILE*arq = fopen(arquivo_idc, "rb");
-    int pos = 0;
+    if(arq == NULL)
+        printf("arquivo inexistente\n");
     fseek(arq, 0, SEEK_END);
-    int tam1 = ftell(arq)/sizeof(idc);
+    int tam1 = ftell(arq)/sizeof(idc), pos = 0;
     fseek(arq, 0, SEEK_SET);
     idc elem;
-    while(pos<tam1){
+    while(pos < tam1){
         fread(&elem, sizeof(idc), 1, arq);
         if(strcmp(elem.palavra, palavra) == 0)
             break;
@@ -327,7 +379,6 @@ void imprimir_do_arquivo(char*arquivo_idc, char*arquivo_tup, int qtd_arq, char*p
     else{
         printf("termo inexistente\n");
     }
-
 }
 
 //=======================CHAR FUNCOES====================//
@@ -343,10 +394,14 @@ char*converte_minusculo(char*palavra){
     result[tam] = '\0';
     return result;
 }
-char**vetor_arquivos(tup*vetor, int quant_arq){
+char**vetor_arquivos(char*arquivo_tup, int quant_arq){
     char**ptr = (char**)malloc(quant_arq*sizeof(char*));
+    FILE*arq = fopen(arquivo_tup, "rb");
+    tup elem;
     for(int i=0; i<quant_arq; i++){
-        ptr[i] = vetor[i].arquivo;
+        fread(&elem, sizeof(tup), 1, arq);
+        ptr[i] = elem.arquivo;
     }
+    fclose(arq);
     return ptr;
 }
