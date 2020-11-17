@@ -61,6 +61,7 @@ int main(){
         else if(opc == 3){
             char novo_arquivo[60];
             char**ptr2 = (char**)malloc((qtd_arq+1)*sizeof(char*));
+            lst novo = NULL;
             printf("arquivo: ");
             scanf("%s", novo_arquivo);
             ptr2[qtd_arq] = novo_arquivo;
@@ -68,7 +69,14 @@ int main(){
                 ptr2[i] = ptr[i];
             }
             qtd_arq += 1;
-            indice = ler_arquivo_bin("indice.bin", &tam_idc);
+            // indice = ler_arquivo_bin("indice.bin", &tam_idc);
+            for(int i=0; i<qtd_arq; i++){
+                novo = conjunto_listas(novo, ler_arquivo_texto(ptr2[i]));
+                novo = remove_stop_words(novo, stop_words);
+            }
+            novo = tratamento_repeticao(novo);
+            indice = gera_indice(novo);
+            tam_idc = tamanho_lista_palavras(novo);
             tam_tup = tam_idc*qtd_arq;
             tupla = gera_tupla(indice, ptr2, tam_tup, qtd_arq);
             criar_arq_bin(indice, tam_idc);
@@ -79,7 +87,6 @@ int main(){
             // imprimir_indice(ler_arquivo_bin("indice.bin", &tam_idc), tam_idc);
             scanf("%s", termo);
             existe_idc(ler_arquivo_bin("indice.bin", &tam_idc), tam_idc, termo)? printf("termo existe\n") : printf("termo inexistente\n");
-
         }
         else{
             break;
