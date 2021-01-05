@@ -6,6 +6,7 @@ using namespace std;
 //g++ main.cpp Tabela.cpp -o main.exe
 
 void ler_arquivos_docs(Tabela*tab){
+    /*considero que essa pastar estara dentro do projeto*/
     char arquivo[50];
     for(int i=1; i<=20; i++){
         snprintf(arquivo, 50, "%s%d%s", ".\\docs\\doc", i, ".txt");
