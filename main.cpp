@@ -3,8 +3,14 @@
 #include"Tabela.hpp"
 using namespace std;
 
-//g++ main.cpp Tabela.cpp -o main.exe
+// para executar:
+// abra o terminal, acesse a pasta por ele e digite:
+// g++ main.cpp Tabela.cpp -o main.exe
 
+
+// essa funcao é por conta de um trabalho da faculdade no qual eu tinha que ler arquivos textos guardados numa pasta
+// como os nomes ja sao de conhecimento, entao criei essa funcao especificamente para esse caso
+// para executar o programa de forma generica, apenas remova essa funcao da main
 void ler_arquivos_docs(Tabela*tab){
     /*considero que essa pastar estara dentro do projeto*/
     char arquivo[50];
@@ -27,7 +33,7 @@ int main(){
     char termo1[60],termo2[60];
     Tabela *t = new Tabela();
     t->insere_stop_words(arq_stop_words);
-    ler_arquivos_docs(t);
+    ler_arquivos_docs(t); //para funcionar de forma generica, remova essa funcao
     t->gerar();
     system("cls");
     while(op != 0){
